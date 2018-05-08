@@ -40,7 +40,7 @@ public abstract class RealNode extends TerminalNode {
 
     @Specialization
     public double executeReal(){
-        CompilerAsserts.compilationConstant(val);
+        //CompilerAsserts.compilationConstant(val);
         return getValue();
     }
 

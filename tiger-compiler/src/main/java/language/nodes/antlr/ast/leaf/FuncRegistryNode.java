@@ -9,7 +9,6 @@ public class FuncRegistryNode {
 
     public final String name;
 
-    private RootCallTarget callTarget;
 
     public FuncRegistryNode(TigerLang lang, String name) {
         this.name = name;

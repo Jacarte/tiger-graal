@@ -34,7 +34,7 @@ public abstract class StringNode extends TerminalNode {
 
     @Specialization
     public String executeString(){
-        CompilerAsserts.compilationConstant(value);
+        //CompilerAsserts.compilationConstant(value);
         return getValue();
     }
 }

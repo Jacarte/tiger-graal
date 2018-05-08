@@ -42,7 +42,6 @@ public abstract class IntegerNode extends TerminalNode {
     @Specialization
     public long executeLong()
     {
-        CompilerAsserts.compilationConstant(value);
         return getValue();
     }
 

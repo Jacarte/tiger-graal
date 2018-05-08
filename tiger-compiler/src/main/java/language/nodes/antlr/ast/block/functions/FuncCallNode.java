@@ -11,6 +11,7 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
 import language.NilValue;
 import language.nodes.TigerRootNode;
 import language.nodes.antlr.ast.ExpressionNode;
+import language.nodes.antlr.ast.leaf.FuncRegistryNode;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -24,11 +25,11 @@ public class FuncCallNode extends ExpressionNode {
 
     @Child DispatchNode dispatchNode;
 
-    public FuncCallNode(String name, ExpressionNode[] args, DispatchNode dispatchNode){
+    public FuncCallNode(String name, ExpressionNode[] args){
         this.name = name;
         this.args = args;
 
-        this.dispatchNode = dispatchNode;
+        this.dispatchNode = DispatchNodeGen.create();
     }
 
     @Override
@@ -43,56 +44,26 @@ public class FuncCallNode extends ExpressionNode {
 
         CompilerAsserts.compilationConstant(args.length);
 
-        FuncDefinitionNode obj = null;
+
+        Object obj = null;
         try {
-            Object tocast =  readUpStack(Frame::getObject, frame, name);
-            obj = (FuncDefinitionNode)tocast;
+            obj = readUpStack(Frame::getObject, frame, name);
         } catch (FrameSlotTypeException e) {
             e.printStackTrace();
         }
 
-        Map<String, Object> argValues = new HashMap<>();
 
-        //System.out.print("calling function with ");
-
-        Object[] exprResults = new Object[args.length];
-        for(int i = 0; i < obj.getNumberOfArguments(); i++) {
-            exprResults[i] = args[i].executeGeneric(frame);
+        Object[] exprResults = new Object[args.length + 1];
+        for(int i = 0; i < args.length; i++) {
+            exprResults[i + 1] = args[i].executeGeneric(frame);
         }
 
-        //argValues[0] = getScope();
+        exprResults[0] = frame;
 
-//        System.out.println("");
-
-
-        if(obj instanceof BuiltInCallNode)
-            result = ((BuiltInCallNode) obj).executeBuiltIn(exprResults);
-        else if(obj instanceof FuncDeclarationNode) {
-
-            //setupStack(obj.getScope(), obj.args);
-            for(int i = 0; i < obj.getNumberOfArguments(); i++) {
-                argValues.put(obj.args[i], exprResults[i]);
-            }
-
-            TigerRootNode root = new TigerRootNode(((FuncDeclarationNode) obj).lang, obj.getBlock(),
-                    new FrameDescriptor());
-
-            //IndirectCallNode in = Truffle.getRuntime().createIndirectCallNode();
-
-            result = Truffle.getRuntime().createDirectCallNode(
-                    Truffle.getRuntime().createCallTarget(root)
-            ).call(new Object[]{frame, argValues});
-
-            //result = in.call(Truffle.getRuntime().createCallTarget(root) , );
-
-
-            //result = obj.getBlock().executeGeneric(frame);
-
-            //cleanStack(obj.getScope(), obj.args);
-        }
-        //System.out.println("  Resulting " + result);
-
-        return result;
+        if(obj instanceof FuncDeclarationNode)
+            return dispatchNode.executeDispatch(obj, exprResults);
+        else
+            return ((BuiltInCallNode)obj).executeBuiltIn(exprResults);
     }
 
 }

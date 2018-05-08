@@ -64,6 +64,6 @@ public final class TigerLang extends TruffleLanguage<TigerLangContext> {
         ExpressionNode node = parseSource(request.getSource());
 
 
-        return Truffle.getRuntime().createCallTarget(new TigerRootNode(this, node, getContextReference().get().getGlobalFrame().getFrameDescriptor()));
+        return Truffle.getRuntime().createCallTarget(new TigerRootNode(this, node, getContextReference().get().getGlobalFrame().getFrameDescriptor(), new String[0]));
     }
 }

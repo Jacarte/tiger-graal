@@ -42,8 +42,10 @@ public class WhileRepeatinNode extends Node implements RepeatingNode {
 
     boolean executeCondition(VirtualFrame frame){
 
-        try{
-            long result = condition.executeLong(frame);
+        long result = 0;
+        try {
+            result = condition.executeLong(frame);
+
 
             return result > 0;
         } catch (UnexpectedResultException e) {

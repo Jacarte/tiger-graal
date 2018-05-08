@@ -15,12 +15,12 @@ public abstract class IdNode extends TerminalNode {
     }
 
 
-    public static interface FrameGet<T> {
+    public interface FrameGet<T> {
         T get(Frame frame, FrameSlot slot) throws FrameSlotTypeException;
     }
 
 
-    public static interface FrameSet<T> {
+    public interface FrameSet<T> {
         void set(Frame frame, FrameSlot slot, T value) throws FrameSlotTypeException;
     }
 
@@ -48,6 +48,7 @@ public abstract class IdNode extends TerminalNode {
     }
 
     boolean isLong(VirtualFrame frame){
+
         return getSlotUp(frame, getName()).getKind() == FrameSlotKind.Long;
     }
 
@@ -59,6 +60,15 @@ public abstract class IdNode extends TerminalNode {
 
 
         return (FuncDefinitionNode) readUpStack(Frame::getObject, virtualFrame, getName());
+    }
+
+
+
+    @Specialization(rewriteOn = FrameSlotTypeException.class)
+    public Object readObj(VirtualFrame virtualFrame)
+            throws FrameSlotTypeException {
+
+        return  readUpStack(Frame::getObject, virtualFrame, getName());
     }
 
 

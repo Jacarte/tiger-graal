@@ -24,7 +24,7 @@ public class PrintNode extends BuiltInCallNode {
     @Override
     @CompilerDirectives.TruffleBoundary
     public Object executeBuiltIn(Object[] args) {
-        System.out.println(args[0]);
+        System.out.println(args[1]);
         return new NilValue();
     }
 

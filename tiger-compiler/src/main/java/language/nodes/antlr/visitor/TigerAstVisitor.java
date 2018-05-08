@@ -65,6 +65,7 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
     TigerLang lang;
 
+    int iden = 0;
     public TigerAstVisitor(TigerLang lang) {
         this.lang = lang;
     }
@@ -74,28 +75,48 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
         return new TigerAstVisitor(lang).visit(tree);
     }
 
+    String getIden(){
+        String result = "";
+
+        for(int i = 0; i < iden; i++)
+            result += "  ";
+
+        return result;
+    }
+
     @Override
     public ProgramNode visitProgram(TigerParser.ProgramContext ctx) {
 
         long now = System.currentTimeMillis();
-        ProgramNode programNode = new ProgramNode(visit(ctx.evaluation()));
 
-        System.out.println((System.currentTimeMillis() - now) +  " ms ast visitor");
+        iden++;
+        //System.out.println("Program");
+        ProgramNode programNode = new ProgramNode(visit(ctx.evaluation()));
+        iden--;
+
+        //System.out.println((System.currentTimeMillis() - now) +  " ms ast visitor");
         return programNode;
     }
 
     @Override
     public ExpressionNode visitIntegerNode(TigerParser.IntegerNodeContext ctx) {
+
+        //System.out.println(getIden() + ctx.INTEGER().getSymbol().getText());
         return IntegerNodeGen.create(ctx.INTEGER().getSymbol());
     }
 
     @Override
     public ExpressionNode visitStringNode(TigerParser.StringNodeContext ctx) {
+
+        //System.out.println(getIden() + ctx.STRING().getSymbol().getText());
         return StringNodeGen.create(ctx.STRING().getSymbol());
     }
 
     @Override
-    public ExpressionNode visitBreakNode(TigerParser.BreakNodeContext ctx) {
+    public ExpressionNode visitBreakNode(TigerParser.BreakNodeContext ctx)
+    {
+
+        //System.out.println(getIden() + "BREAK");
         return new BreakNode();
     }
 
@@ -106,43 +127,67 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
     @Override
     public ExpressionNode visitIfThenNode(TigerParser.IfThenNodeContext ctx) {
+
+        //System.out.println(getIden() + "IF then");
         return new IfNode(visit(ctx.cond), visit(ctx.et));
     }
 
     @Override
     public ExpressionNode visitIfThenElseNode(TigerParser.IfThenElseNodeContext ctx) {
+
+        //System.out.println(getIden() + "IF then else");
         return new IfThenElseNode(visit(ctx.cond), visit(ctx.et), visit(ctx.els));
     }
 
     @Override
     public ExpressionNode visitNilNode(TigerParser.NilNodeContext ctx) {
+
+        //System.out.println(getIden() + "nil");
         return new NilNode(ctx.NIL().getSymbol());
     }
 
     @Override
     public ExpressionNode visitRealNode(TigerParser.RealNodeContext ctx) {
+
+        //System.out.println(getIden() + ctx.REAL().getSymbol().getText());
         return RealNodeGen.create(ctx.REAL().getSymbol());
     }
 
     @Override
     public ExpressionNode visitWhileNode(TigerParser.WhileNodeContext ctx) {
+
+        //System.out.println(getIden() + "while");
         return new WhileNode(visit(ctx.cond), visit(ctx.dob));
     }
 
     @Override
     public ExpressionNode visitForNode(TigerParser.ForNodeContext ctx) {
-        ExpressionNode result =  new ForNode((SimpleAssignNode) visit(ctx.init), visit(ctx.final_), visit(ctx.doex));
+
+        //System.out.println(getIden() + "for");
+
+        iden++;
+
+        SimpleAssignNode assign = (SimpleAssignNode) visit(ctx.init);
+
+        ExpressionNode result =  new ForNode(
+                assign.getVarId(),
+                        assign.getExpr(), visit(ctx.final_), visit(ctx.doex));
+        iden--;
         return result;
     }
 
     @Override
     public ExpressionNode visitSAssignNode(TigerParser.SAssignNodeContext ctx) {
+
+        //System.out.println(getIden() + "assign " + ctx.ID().getSymbol().getText());
         return SimpleAssignNodeGen.create(ctx.ID().getSymbol().getText(), visit(ctx.evaluation()));
     }
 
     @Override
     public ExpressionNode visitExprListNode(TigerParser.ExprListNodeContext ctx) {
 
+
+        //System.out.println(getIden() + "expression" );
         ExpressionNode[] expr = new ExpressionNode[ctx.list.evaluation().size()];
 
         for(int i = 0; i < expr.length; i++)
@@ -154,6 +199,10 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
     @Override
     public ExpressionNode visitLetNode(TigerParser.LetNodeContext ctx) {
+
+
+        //System.out.println(getIden() + "let ");
+        iden++;
 
         DeclarationNode[] decs = new DeclarationNode[ctx.let().declaration().size()];
 
@@ -168,6 +217,7 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
         ExpressionNode node = new LetInTigerNode(expr, decs);
 
+        iden--;
 
         return node;
     }
@@ -175,6 +225,8 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
     @Override
     public ExpressionNode visitIdNode(TigerParser.IdNodeContext ctx) {
 
+
+        //System.out.println(getIden() + "read id " + ctx.ID().getSymbol().getText());
         IdNode node = IdNodeGen.create(ctx.ID().getSymbol());
 
         return node;
@@ -182,6 +234,8 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
     @Override
     public ExpressionNode visitVariableAssign(TigerParser.VariableAssignContext ctx) {
+
+        //System.out.println(getIden() + "var assign " + ctx.ID().getSymbol().getText());
         ExpressionNode init = visit(ctx.evaluation());
         ExpressionNode dec = VariableDeclarationNodeGen.create(init, ctx.ID().getSymbol().getText());
 
@@ -194,13 +248,15 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
     public ExpressionNode visitFuncDefineNode(TigerParser.FuncDefineNodeContext ctx) {
 
 
+        //System.out.println(getIden() + "funcdef " + ctx.ID().getSymbol().getText());
+
         String[] args = new String[ctx.type_fields() != null? ctx.type_fields().func_arg().size(): 0];
 
         for(int i = 0; i < args.length; i++)
             args[i] = ctx.type_fields().func_arg(i).name.getText();
 
 
-        ExpressionNode func = new FuncDeclarationNode(lang, ctx.evaluation(), args, ctx.il.getText());
+        ExpressionNode func = new FuncDeclarationNode(lang,args, visit(ctx.evaluation()), ctx.il.getText());
 
         return func;
     }
@@ -254,6 +310,8 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
     @Override
     public ExpressionNode visitFUNCALL(TigerParser.FUNCALLContext ctx) {
 
+
+        // System.out.println(getIden() + "funcall " + ctx.ID().getSymbol().getText());
         ExpressionNode[] params = new ExpressionNode[ctx.expr_list()!=null? ctx.expr_list().evaluation().size():0];
 
         for(int i =0; i < params.length; i++) {
@@ -261,7 +319,7 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
         }
 
-        return new FuncCallNode(ctx.ID().getSymbol().getText(), params, DispatchNodeGen.create());
+        return new FuncCallNode(ctx.ID().getSymbol().getText(), params);
     }
 
     @Override

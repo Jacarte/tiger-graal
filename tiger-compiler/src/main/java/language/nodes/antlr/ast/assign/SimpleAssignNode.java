@@ -16,6 +16,8 @@ public abstract class SimpleAssignNode extends ExpressionNode {
 
     @CompilerDirectives.CompilationFinal String id;
 
+    public abstract ExpressionNode getExpr();
+
     public SimpleAssignNode(String id){
         this.id = id;
     }
@@ -25,6 +27,7 @@ public abstract class SimpleAssignNode extends ExpressionNode {
         // frame.setLong(getSlot(frame, id), expr);
         FrameSlot slot = defineSlot(frame, id);
         slot.setKind(FrameSlotKind.Long);
+
         return expr;
     }
 

@@ -52,7 +52,7 @@ public abstract class ExpressionNode extends BaseTigerNode{
             if(fr == null)
                 throw  new ScopeException("The variable is not defined " + name);
 
-            slot = fr.getFrameDescriptor().findOrAddFrameSlot(name);
+            slot = fr.getFrameDescriptor().findFrameSlot(name);
         }
 
         return slot;

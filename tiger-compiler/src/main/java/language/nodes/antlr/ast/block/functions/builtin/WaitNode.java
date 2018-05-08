@@ -16,7 +16,7 @@ public class WaitNode extends BuiltInCallNode {
     public Object executeBuiltIn(Object[] args) {
 
         try {
-            Thread.sleep((long)args[0]);
+            Thread.sleep((long)args[1]);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

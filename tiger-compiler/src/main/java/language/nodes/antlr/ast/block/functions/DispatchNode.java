@@ -17,7 +17,7 @@ public abstract class DispatchNode extends Node {
 
     @Specialization
     @SuppressWarnings("unused")
-    protected static Object doDirect(FuncRegistryNode function, Object[] arguments,
+    protected static Object doDirect(FuncDeclarationNode function, Object[] arguments,
                                      @Cached("function.getCallTarget()") RootCallTarget callTarget) {
 
         /* Inline cache hit, we are safe to execute the cached call target. */
