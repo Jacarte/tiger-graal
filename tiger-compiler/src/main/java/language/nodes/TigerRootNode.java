@@ -4,6 +4,7 @@ import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.TruffleLanguage;
 import com.oracle.truffle.api.frame.*;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.RootNode;
 import language.nodes.antlr.ast.ExpressionNode;
 import sun.jvm.hotspot.debugger.Address;
@@ -26,11 +27,6 @@ public class TigerRootNode extends RootNode {
 
     void setByType(String name, Object value, Frame fr){
 
-        if(name.equals("size"))
-        {
-            System.out.println("size");
-        }
-
         FrameSlot slot = fr.getFrameDescriptor().findOrAddFrameSlot(name);
 
         if(value instanceof Long){
@@ -48,6 +44,7 @@ public class TigerRootNode extends RootNode {
     }
 
     @Override
+    @ExplodeLoop
     public Object execute(VirtualFrame frame) {
 
         if(frame.getArguments().length > 1){

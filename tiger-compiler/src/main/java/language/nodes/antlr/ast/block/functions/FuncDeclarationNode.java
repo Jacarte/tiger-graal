@@ -28,6 +28,8 @@ public class FuncDeclarationNode extends DeclarationNode {
     ExpressionNode body;
     String[] argName;
 
+    Assumption callTargetStable;
+
     public FuncDeclarationNode(TigerLang lang, String[] argName, ExpressionNode body,  String name){
         this.name = name;
         this.body = body;
@@ -36,13 +38,23 @@ public class FuncDeclarationNode extends DeclarationNode {
         this.argName = argName;
 
         callTarget = Truffle.getRuntime().createCallTarget(new TigerRootNode(lang, body, new FrameDescriptor(), argName));
+        callTargetStable = Truffle.getRuntime().createAssumption(name);
     }
 
+
+    protected void setCallTarget(RootCallTarget callTarget) {
+        this.callTarget = callTarget;
+        this.callTargetStable.invalidate();
+        this.callTargetStable = Truffle.getRuntime().createAssumption(name);
+    }
 
     public RootCallTarget getCallTarget(){
         return callTarget;
     }
 
+    public Assumption getCallTargetStable() {
+        return callTargetStable;
+    }
 
     @Override
     public Type getType() {

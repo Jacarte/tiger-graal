@@ -1,5 +1,6 @@
 package language.nodes.antlr.ast;
 
+import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.*;
 import com.oracle.truffle.api.nodes.UnexpectedResultException;
@@ -84,21 +85,47 @@ public abstract class ExpressionNode extends BaseTigerNode{
         }
     }
 
+    @CompilerDirectives.CompilationFinal FrameSlot resolvedSlot;
+    @CompilerDirectives.CompilationFinal int lookupDeep;
+
+
+
     public <T> T readUpStack(IdNode.FrameGet<T> getter, Frame frame, String name)
             throws FrameSlotTypeException {
-        FrameSlot slot = getSlot(frame, name);
 
+        if (this.resolvedSlot == null) {
+            CompilerDirectives.transferToInterpreterAndInvalidate();
+            this.resolveSlot(getter, frame, name);
+        }
+
+        Frame lookupFrame = frame;
+        for (int i = 0; i < this.lookupDeep; i++) {
+            lookupFrame = this.getParentFrame(lookupFrame);
+        }
+        return getter.get(lookupFrame, this.resolvedSlot);
+    }
+
+    private <T> void resolveSlot(IdNode.FrameGet<T> getter, Frame frame, String name)
+            throws FrameSlotTypeException {
+        FrameSlot slot = this.getSlot(frame, name);
+        int depth = 0;
         T value = slot == null? null : getter.get(frame, slot);
         while (value == null) {
-
+            depth++;
             frame = this.getParentFrame(frame);
             if (frame == null) {
-                throw new RuntimeException("Unknown variable: " + name);
+                CompilerDirectives.transferToInterpreterAndInvalidate();
+                throw new RuntimeException("Unknown variable: "
+                        + name);
             }
-            slot = getSlot(frame, name);
-            value = slot == null ? null : getter.get(frame, slot);
+            FrameDescriptor desc = frame.getFrameDescriptor();
+            slot = desc.findFrameSlot(name);
+            if (slot != null) {
+                value = getter.get(frame, slot);
+            }
         }
-        return value;
+        this.lookupDeep = depth;
+        this.resolvedSlot = slot;
     }
 
 
