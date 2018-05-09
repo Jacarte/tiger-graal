@@ -35,16 +35,18 @@ public class ForRepeatingNode extends Node implements RepeatingNode {
         void doit(long assign);
     }
 
-    IAction action;
+    FrameSlot slot;
+    VirtualFrame scope;
 
-    public ForRepeatingNode(String varId, long init, long end, ExpressionNode body, IAction action) {
+    public ForRepeatingNode(String varId, long init, long end, ExpressionNode body, FrameSlot slot, VirtualFrame scope) {
 
         it = init - 1;
         this.end = end;
         this.varId = varId;
         this.body = body;
 
-        this.action = action;
+        this.slot = slot;
+        this.scope = scope;
     }
 
     @Override
@@ -76,9 +78,7 @@ public class ForRepeatingNode extends Node implements RepeatingNode {
         }
 
         it++;
-
-        action.doit(it);
-
+        scope.setLong(slot, it);
         return true;
 
     }

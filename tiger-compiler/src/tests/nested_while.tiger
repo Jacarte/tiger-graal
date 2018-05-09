@@ -1,0 +1,33 @@
+let
+    var x:= 0
+    var start:=0
+    var out:=0
+in
+    while out < 100 do (
+        start := nano_time();
+        while x < 1000 do (
+
+            let
+                var y:= 0
+            in
+                while y < 1000 do(
+                    let
+                        var z:=0
+                    in
+                        while z < 50 do (
+
+                            z := z + 1
+                        )
+                    end;
+                    y := y + 1
+                )
+            end;
+
+            x := x + 1
+        );
+
+        print((nano_time() - start)/1000000);
+        out := out + 1;
+        x := 0
+    )
+end

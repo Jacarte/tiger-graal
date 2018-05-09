@@ -9,12 +9,12 @@ import org.antlr.v4.runtime.Token;
 
 import java.lang.reflect.Type;
 
-@NodeField(name = "scope", type = MaterializedFrame.class)
+@NodeField(name = "scope", type = VirtualFrame.class)
 @NodeField(name = "slot", type = FrameSlot.class)
 public abstract class IdNode extends TerminalNode {
 
     public abstract FrameSlot getSlot();
-    public abstract MaterializedFrame getScope();
+    public abstract VirtualFrame getScope();
 
     public Type getType() {
         return Object.class;

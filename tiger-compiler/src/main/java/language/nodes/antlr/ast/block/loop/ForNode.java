@@ -31,9 +31,9 @@ public class ForNode extends LoopNode {
     String varId;
 
     FrameSlot slot;
-    MaterializedFrame scope;
+    VirtualFrame scope;
 
-    public ForNode(String varId, ExpressionNode init, ExpressionNode finalEx, ExpressionNode block, FrameSlot slot, MaterializedFrame frame){
+    public ForNode(String varId, ExpressionNode init, ExpressionNode finalEx, ExpressionNode block, FrameSlot slot, VirtualFrame frame){
         this.varId = varId;
         this.end = finalEx;
         this.init = init;
@@ -41,6 +41,8 @@ public class ForNode extends LoopNode {
 
         this.slot = slot;
         this.scope = frame;
+
+
     }
 
     @Override
@@ -60,11 +62,10 @@ public class ForNode extends LoopNode {
 
         } catch (UnexpectedResultException e) {
             e.printStackTrace();
+
         }
 
-        loop = Truffle.getRuntime().createLoopNode(new ForRepeatingNode(varId, init, end, block, (assign) -> {
-            scope.setLong(slot, assign);
-        }));
+        loop = Truffle.getRuntime().createLoopNode(new ForRepeatingNode(varId, init, end, block, slot, scope));
 
         loop.executeLoop(frame);
 

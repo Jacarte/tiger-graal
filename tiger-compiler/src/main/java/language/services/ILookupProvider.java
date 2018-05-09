@@ -14,7 +14,7 @@ public interface ILookupProvider {
 
     ILookupProvider getParent();
 
-    Frame getFrame();
+    VirtualFrame getFrame();
 
     ILookupProvider createChild(ILookupProvider parent);
 
@@ -22,6 +22,6 @@ public interface ILookupProvider {
 
     FrameSlot getThisSlot(String name);
 
-    Pair<Frame, FrameSlot> findUp(String name);
+    Pair<VirtualFrame, FrameSlot> findUp(String name);
 
 }

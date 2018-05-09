@@ -16,9 +16,9 @@ import java.util.Map;
 public class NaiveLookupProvider implements ILookupProvider {
 
     ILookupProvider parent;
-    Frame frame;
+    VirtualFrame frame;
 
-    public NaiveLookupProvider(ILookupProvider parent, Frame frame){
+    public NaiveLookupProvider(ILookupProvider parent, VirtualFrame frame){
         this.parent = parent;
         this.frame = frame;
     }
@@ -29,7 +29,7 @@ public class NaiveLookupProvider implements ILookupProvider {
     }
 
     @Override
-    public Frame getFrame() {
+    public VirtualFrame getFrame() {
         return frame;
     }
 
@@ -49,12 +49,12 @@ public class NaiveLookupProvider implements ILookupProvider {
     }
 
     @Override
-    public Pair<Frame, FrameSlot> findUp(String name) {
+    public Pair<VirtualFrame, FrameSlot> findUp(String name) {
 
         FrameSlot slot = frame.getFrameDescriptor().findFrameSlot(name);
 
         ILookupProvider parent = this;
-        Frame fr = this.getFrame();
+        VirtualFrame fr = this.getFrame();
 
         while(slot == null){
 

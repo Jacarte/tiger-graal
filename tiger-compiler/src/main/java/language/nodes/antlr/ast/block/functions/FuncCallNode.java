@@ -60,13 +60,10 @@ public class FuncCallNode extends ExpressionNode {
             exprResults[i + 1] = args[i].executeGeneric(frame);
         }
 
-        exprResults[0] = frame;
+        exprResults[0] = frame.materialize();
 
+        return dispatchNode.executeDispatch(obj, exprResults);
 
-        if(obj instanceof FuncDeclarationNode)
-            return dispatchNode.executeDispatch(obj, exprResults);
-        else
-            return ((BuiltInCallNode)obj).executeBuiltIn(exprResults);
     }
 
 }

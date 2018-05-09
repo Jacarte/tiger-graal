@@ -4,36 +4,25 @@ import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import language.NilValue;
+import language.TigerLang;
+import language.nodes.antlr.ast.ExpressionNode;
 import language.nodes.antlr.ast.block.functions.BuiltInCallNode;
+import language.nodes.antlr.ast.block.functions.FuncDeclarationNode;
 
 import java.lang.reflect.Type;
 
 @NodeInfo(shortName = "println")
-public class PrintNode extends BuiltInCallNode {
+public class PrintNode extends ExpressionNode {
+
 
     @Override
     public Type getType() {
-        return NilValue.class;
+        return null;
     }
 
     @Override
     public Object executeGeneric(VirtualFrame frame) {
+        System.out.println(frame.getArguments()[1]);
         return new NilValue();
-    }
-
-    @Override
-    @CompilerDirectives.TruffleBoundary
-    public Object executeBuiltIn(Object[] args) {
-        System.out.println(args[1]);
-        return new NilValue();
-    }
-
-    @Override
-    public long getNumberOfArguments() {
-        return 1;
-    }
-
-    {
-        args = new String[]{"obj"};
     }
 }

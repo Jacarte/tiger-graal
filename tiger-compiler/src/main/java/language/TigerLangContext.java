@@ -26,7 +26,7 @@ public final class TigerLangContext {
     }
 
 
-    public Frame getGlobalFrame(){
+    public VirtualFrame getGlobalFrame(){
         return globalFrame;
     }
 

@@ -1,6 +1,7 @@
 package language.services;
 
 import com.oracle.truffle.api.frame.Frame;
+import com.oracle.truffle.api.frame.VirtualFrame;
 import language.services.providers.NaiveLookupProvider;
 
 public class LookupProviderFactory {
@@ -12,7 +13,7 @@ public class LookupProviderFactory {
     }
 
 
-    public ILookupProvider getProvider(LOOKUP_TYPE type, Frame frame){
+    public ILookupProvider getProvider(LOOKUP_TYPE type, VirtualFrame frame){
 
         return new NaiveLookupProvider(null, frame);
     }

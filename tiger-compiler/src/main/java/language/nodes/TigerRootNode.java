@@ -16,12 +16,9 @@ public class TigerRootNode extends RootNode {
     @Child private ExpressionNode mainNode;
     @CompilerDirectives.CompilationFinal private String name;
 
-    String[] args;
-
-    public TigerRootNode(TruffleLanguage<?> language, ExpressionNode node, FrameDescriptor descriptor, String[] args) {
+    public TigerRootNode(TruffleLanguage<?> language, FrameDescriptor descriptor, ExpressionNode node) {
         super(language, descriptor);
         this.mainNode = node;
-        this.args = args;
     }
 
     @Override

@@ -15,7 +15,7 @@ import java.lang.reflect.Type;
 @NodeChild(value = "expr", type = ExpressionNode.class)
 @NodeField(name = "id", type = String.class)
 @NodeField(name = "slot", type = FrameSlot.class)
-@NodeField(name = "scope", type = MaterializedFrame.class)
+@NodeField(name = "scope", type = VirtualFrame.class)
 public abstract class VariableDeclarationNode extends DeclarationNode {
 
 
@@ -25,7 +25,7 @@ public abstract class VariableDeclarationNode extends DeclarationNode {
 
     public abstract FrameSlot getSlot();
 
-    public abstract MaterializedFrame getScope();
+    public abstract VirtualFrame getScope();
 
 
     @Override

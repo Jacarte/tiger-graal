@@ -16,14 +16,14 @@ import java.lang.reflect.Type;
 })
 @NodeField(name = "id", type = String.class)
 @NodeField(name = "slot", type = FrameSlot.class)
-@NodeField(name="scope", type = MaterializedFrame.class)
+@NodeField(name="scope", type = VirtualFrame.class)
 public abstract class MemberAssignNode extends ExpressionNode {
 
     public abstract String getId();
     public abstract ExpressionNode getAssign();
 
     public abstract FrameSlot getSlot();
-    public abstract MaterializedFrame getScope();
+    public abstract VirtualFrame getScope();
 
     @Override
     public Type getType() {

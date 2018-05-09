@@ -37,7 +37,7 @@ public class FuncDeclarationNode extends DeclarationNode {
         this.lang = lang;
         this.argName = argName;
 
-        callTarget = Truffle.getRuntime().createCallTarget(new TigerRootNode(lang, body, new FrameDescriptor(), argName));
+        callTarget = Truffle.getRuntime().createCallTarget(new TigerRootNode(lang, new FrameDescriptor(), body));
         callTargetStable = Truffle.getRuntime().createAssumption(name);
     }
 
