@@ -1,8 +1,8 @@
-#Mini Tiger with GraalVm and Truffle proof-of-concept #
+# Mini Tiger with GraalVm and Truffle proof-of-concept #
 
 
 
-##Tiger language modification ##
+## Tiger language modification ##
 I modify the official Tiger <a href="https://cs.nyu.edu/courses/fall13/CSCI-GA.2130-001/tiger-spec.pdf">specification</a> to simplify the development time and beacuse this is a proof-of-concept
 
 The principal modifications are:
@@ -31,34 +31,34 @@ The principal modifications are:
 
 - We dont have comment declarations
 
-##Graal VM and Truffle
+## Graal VM and Truffle
 
 I use the <a href="http://www.oracle.com/technetwork/oracle-labs/program-languages/downloads/index.html">official</a> graal jdk compilation with Truffle (*com.oracle.truffle:1.0.0-rc1*)
 
 I transform the Antlr output AST to Truffle api basically
 
-###Types
+### Types
 These are the types mapped to Truffle Tiger language definition:
    - Long
    - Double
    - Function (This is a custom function object implementation)
    - Nil (Every expression in Mini-Tiger returns value, so, nil is the default)
 
-###Variable Scope
+### Variable Scope
 
-###Variable lookup
+### Variable lookup
 
-###Function call
+### Function call
 
-###Boxing and unboxing
+### Boxing and unboxing
 
-###Tests
+### Tests
 
-###Tests Results
+### Tests Results
 
 ![alt results](imgs/result.png)
 
-##Remarks
+## Remarks
 
 
-##Future research
+## Future research
