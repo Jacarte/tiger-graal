@@ -11,7 +11,7 @@ import language.nodes.antlr.ast.block.functions.FuncDeclarationNode;
 
 import java.lang.reflect.Type;
 
-@NodeInfo(shortName = "println")
+@NodeInfo(shortName = "print")
 public class PrintNode extends ExpressionNode {
 
 
@@ -22,7 +22,8 @@ public class PrintNode extends ExpressionNode {
 
     @Override
     public Object executeGeneric(VirtualFrame frame) {
-        System.out.println(frame.getArguments()[1]);
+        System.out.print(frame.getArguments()[1]);
+        System.out.flush();
         return new NilValue();
     }
 }

@@ -246,8 +246,9 @@ public class ScriptTest {
                 mandelbrot(problemSize);
                 long elapsed = (System.nanoTime() - start) / 1000000;
                 iterations--;
-                System.out.println("Mandelbrot: iterations=1 runtime: " +
-                        elapsed + "ms");
+                System.out.print(
+                        elapsed + ",");
+                System.out.flush();
             }
             if (!sample()) {
                 throw new RuntimeException();

@@ -78,6 +78,7 @@ let
     (
         start:=nano_time();
         result := mandelbrot(1000);
-        print((nano_time() - start)/1000000)
+        print((nano_time() - start)/1000000);
+        print(",")
     )
 end
