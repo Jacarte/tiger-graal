@@ -107,7 +107,7 @@ To pass arguments to a function call I set the arguments as follows :
 
 ### Tests
 
-I test the <a href="https://github.com/smarr/Classic-Benchmarks/blob/master/benchmarks/Mandelbrot.java#L42ß">classic Mandelbrot benchmark</a> for Java and <a href="https://gitlab.com/Jacarte9212/tiger-graal/blob/master/tiger-compiler/src/tests/mandelbrot.tiger">a custom tiger Mandelbrot test<a>
+The <a href="https://github.com/smarr/Classic-Benchmarks/blob/master/benchmarks/Mandelbrot.java#L42ß">classic Mandelbrot benchmark</a> for Java was tested against <a href="https://gitlab.com/Jacarte9212/tiger-graal/blob/master/tiger-compiler/src/tests/mandelbrot.tiger">a custom tiger Mandelbrot test<a>
 
 ### Tests Results and remarks
 
