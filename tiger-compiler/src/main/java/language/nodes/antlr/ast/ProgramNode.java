@@ -31,12 +31,6 @@ public class ProgramNode extends ExpressionNode {
     public Object executeGeneric(VirtualFrame frame) {
 
 
-        // Register Built in
-        frame.setObject(defineSlot(frame, "print"), new PrintNode());
-        frame.setObject(defineSlot(frame, "wait"), new WaitNode());
-        frame.setObject(defineSlot(frame, "nano_time"), new NanoTimeNode());
-        // Register Built in
-
         return expression.executeGeneric(frame);
     }
 }

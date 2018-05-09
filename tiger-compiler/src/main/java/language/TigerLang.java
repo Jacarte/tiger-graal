@@ -12,6 +12,7 @@ import language.nodes.TigerRootNode;
 import language.nodes.antlr.ast.ExpressionNode;
 import language.nodes.antlr.ast.MainNode;
 import language.nodes.antlr.visitor.TigerAstVisitor;
+import language.services.LookupProviderFactory;
 import org.antlr.v4.runtime.tree.ParseTree;
 import sun.jvm.hotspot.opto.RootNode;
 
@@ -52,7 +53,8 @@ public final class TigerLang extends TruffleLanguage<TigerLangContext> {
 
         ParseTree p = TigerAstVisitor.createParseTree(inputStream);
 
-        ExpressionNode pr = TigerAstVisitor.read(this, p);
+        ExpressionNode pr = TigerAstVisitor.read(this, p,
+                new LookupProviderFactory().getProvider(LookupProviderFactory.LOOKUP_TYPE.NAIVE, getContextReference().get().getGlobalFrame()));
 
         return pr;
     }

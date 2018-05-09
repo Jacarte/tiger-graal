@@ -31,12 +31,20 @@ public class ForRepeatingNode extends Node implements RepeatingNode {
      */
     final BranchProfile breakTaken = BranchProfile.create();
 
-    public ForRepeatingNode(String varId, long init, long end, ExpressionNode body) {
+    public interface IAction{
+        void doit(long assign);
+    }
+
+    IAction action;
+
+    public ForRepeatingNode(String varId, long init, long end, ExpressionNode body, IAction action) {
 
         it = init - 1;
         this.end = end;
         this.varId = varId;
         this.body = body;
+
+        this.action = action;
     }
 
     @Override
@@ -62,15 +70,14 @@ public class ForRepeatingNode extends Node implements RepeatingNode {
 
     public boolean evaluateCondition(VirtualFrame frame){
 
-        if(it >=  end) {
+        if(it ==  end - 1) {
             it = -1;
             return false;
         }
 
         it++;
-        FrameSlot slot = frame.getFrameDescriptor().findFrameSlot(varId);
-        frame.setLong(slot,it);
-        slot.setKind(FrameSlotKind.Long);
+
+        action.doit(it);
 
         return true;
 

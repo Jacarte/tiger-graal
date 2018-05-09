@@ -3,6 +3,7 @@ package language.nodes.antlr.ast.assign;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
+import com.oracle.truffle.api.dsl.NodeField;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotKind;
@@ -24,10 +25,6 @@ public abstract class SimpleAssignNode extends ExpressionNode {
 
     @Specialization()
     public long executeInt(VirtualFrame frame, long expr){
-        // frame.setLong(getSlot(frame, id), expr);
-        FrameSlot slot = defineSlot(frame, id);
-        slot.setKind(FrameSlotKind.Long);
-
         return expr;
     }
 

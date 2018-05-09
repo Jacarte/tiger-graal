@@ -1,5 +1,9 @@
 package language.nodes.antlr.visitor;
 
+import com.oracle.truffle.api.frame.Frame;
+import com.oracle.truffle.api.frame.FrameSlot;
+import com.oracle.truffle.api.frame.FrameSlotKind;
+import javafx.util.Pair;
 import language.TigerLang;
 import language.nodes.antlr.ast.ExpressionNode;
 import language.nodes.antlr.ast.ProgramNode;
@@ -7,9 +11,10 @@ import language.nodes.antlr.ast.assign.SimpleAssignNode;
 import language.nodes.antlr.ast.assign.SimpleAssignNodeGen;
 import language.nodes.antlr.ast.block.ExpressionListNode;
 import language.nodes.antlr.ast.block.LetInTigerNode;
-import language.nodes.antlr.ast.block.functions.DispatchNodeGen;
-import language.nodes.antlr.ast.block.functions.FuncCallNode;
-import language.nodes.antlr.ast.block.functions.FuncDeclarationNode;
+import language.nodes.antlr.ast.block.functions.*;
+import language.nodes.antlr.ast.block.functions.builtin.NanoTimeNode;
+import language.nodes.antlr.ast.block.functions.builtin.PrintNode;
+import language.nodes.antlr.ast.block.functions.builtin.WaitNode;
 import language.nodes.antlr.ast.block.loop.BreakNode;
 import language.nodes.antlr.ast.block.loop.ForNode;
 import language.nodes.antlr.ast.block.loop.WhileNode;
@@ -28,6 +33,9 @@ import language.nodes.antlr.ast.ops.bool.*;
 import language.nodes.antlr.parser.TigerBaseVisitor;
 import language.nodes.antlr.parser.TigerLexer;
 import language.nodes.antlr.parser.TigerParser;
+import language.services.IFunctionArgLookupProvider;
+import language.services.ILookupProvider;
+import language.services.providers.FunctionScopeLookupProvider;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CodePointBuffer;
 import org.antlr.v4.runtime.CodePointCharStream;
@@ -65,58 +73,54 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
     TigerLang lang;
 
-    int iden = 0;
-    public TigerAstVisitor(TigerLang lang) {
+
+    ILookupProvider provider;
+    IFunctionArgLookupProvider functionDecs;
+
+    public TigerAstVisitor(TigerLang lang, ILookupProvider provider) {
         this.lang = lang;
+        this.provider = provider;
+        this.functionDecs = new FunctionScopeLookupProvider(null);
     }
 
 
-    public static ExpressionNode read(TigerLang lang,ParseTree tree){
-        return new TigerAstVisitor(lang).visit(tree);
-    }
-
-    String getIden(){
-        String result = "";
-
-        for(int i = 0; i < iden; i++)
-            result += "  ";
-
-        return result;
+    public static ExpressionNode read(TigerLang lang,ParseTree tree, ILookupProvider provider){
+        return new TigerAstVisitor(lang, provider).visit(tree);
     }
 
     @Override
     public ProgramNode visitProgram(TigerParser.ProgramContext ctx) {
 
-        long now = System.currentTimeMillis();
 
-        iden++;
-        //System.out.println("Program");
+        FrameSlot slot = provider.defineSlot("print");
+        slot.setKind(FrameSlotKind.Object);
+        provider.getFrame().setObject(slot, new PrintNode());
+
+        slot = provider.defineSlot("nano_time");
+        slot.setKind(FrameSlotKind.Object);
+        provider.getFrame().setObject(slot, new NanoTimeNode());
+
+        slot = provider.defineSlot("wait");
+        slot.setKind(FrameSlotKind.Object);
+        provider.getFrame().setObject(slot, new WaitNode());
+
         ProgramNode programNode = new ProgramNode(visit(ctx.evaluation()));
-        iden--;
-
-        //System.out.println((System.currentTimeMillis() - now) +  " ms ast visitor");
         return programNode;
     }
 
     @Override
     public ExpressionNode visitIntegerNode(TigerParser.IntegerNodeContext ctx) {
-
-        //System.out.println(getIden() + ctx.INTEGER().getSymbol().getText());
         return IntegerNodeGen.create(ctx.INTEGER().getSymbol());
     }
 
     @Override
     public ExpressionNode visitStringNode(TigerParser.StringNodeContext ctx) {
-
-        //System.out.println(getIden() + ctx.STRING().getSymbol().getText());
         return StringNodeGen.create(ctx.STRING().getSymbol());
     }
 
     @Override
     public ExpressionNode visitBreakNode(TigerParser.BreakNodeContext ctx)
     {
-
-        //System.out.println(getIden() + "BREAK");
         return new BreakNode();
     }
 
@@ -127,22 +131,17 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
     @Override
     public ExpressionNode visitIfThenNode(TigerParser.IfThenNodeContext ctx) {
-
-        //System.out.println(getIden() + "IF then");
         return new IfNode(visit(ctx.cond), visit(ctx.et));
     }
 
     @Override
     public ExpressionNode visitIfThenElseNode(TigerParser.IfThenElseNodeContext ctx) {
 
-        //System.out.println(getIden() + "IF then else");
         return new IfThenElseNode(visit(ctx.cond), visit(ctx.et), visit(ctx.els));
     }
 
     @Override
     public ExpressionNode visitNilNode(TigerParser.NilNodeContext ctx) {
-
-        //System.out.println(getIden() + "nil");
         return new NilNode(ctx.NIL().getSymbol());
     }
 
@@ -155,31 +154,33 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
     @Override
     public ExpressionNode visitWhileNode(TigerParser.WhileNodeContext ctx) {
-
-        //System.out.println(getIden() + "while");
         return new WhileNode(visit(ctx.cond), visit(ctx.dob));
     }
 
     @Override
     public ExpressionNode visitForNode(TigerParser.ForNodeContext ctx) {
 
-        //System.out.println(getIden() + "for");
-
-        iden++;
+        provider = provider.createChild(provider);
 
         SimpleAssignNode assign = (SimpleAssignNode) visit(ctx.init);
 
+
         ExpressionNode result =  new ForNode(
                 assign.getVarId(),
-                        assign.getExpr(), visit(ctx.final_), visit(ctx.doex));
-        iden--;
+                        assign.getExpr(), visit(ctx.final_), visit(ctx.doex),
+                 provider.getThisSlot(assign.getVarId()), provider.getFrame().materialize());
+
+        provider = provider.getParent();
+
         return result;
     }
 
     @Override
     public ExpressionNode visitSAssignNode(TigerParser.SAssignNodeContext ctx) {
 
-        //System.out.println(getIden() + "assign " + ctx.ID().getSymbol().getText());
+        FrameSlot slot = provider.defineSlot(ctx.ID().getSymbol().getText());
+        slot.setKind(FrameSlotKind.Long);
+
         return SimpleAssignNodeGen.create(ctx.ID().getSymbol().getText(), visit(ctx.evaluation()));
     }
 
@@ -201,8 +202,7 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
     public ExpressionNode visitLetNode(TigerParser.LetNodeContext ctx) {
 
 
-        //System.out.println(getIden() + "let ");
-        iden++;
+        provider = provider.createChild(provider);
 
         DeclarationNode[] decs = new DeclarationNode[ctx.let().declaration().size()];
 
@@ -217,7 +217,7 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
         ExpressionNode node = new LetInTigerNode(expr, decs);
 
-        iden--;
+        provider = provider.getParent();
 
         return node;
     }
@@ -225,38 +225,58 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
     @Override
     public ExpressionNode visitIdNode(TigerParser.IdNodeContext ctx) {
 
+        Pair<ArgDeclaration, Integer> arg = functionDecs.getArg(ctx.ID().getSymbol().getText());
 
-        //System.out.println(getIden() + "read id " + ctx.ID().getSymbol().getText());
-        IdNode node = IdNodeGen.create(ctx.ID().getSymbol());
+        if(arg != null)
+            return ArgNodeGen.create(arg.getKey().getIndex(), arg.getValue());
+        else {
 
-        return node;
+            Pair<Frame, FrameSlot> pair = provider.findUp(ctx.ID().getSymbol().getText());
+            return IdNodeGen.create(ctx.ID().getSymbol(), pair.getKey().materialize(), pair.getValue());
+        }
     }
 
     @Override
     public ExpressionNode visitVariableAssign(TigerParser.VariableAssignContext ctx) {
 
-        //System.out.println(getIden() + "var assign " + ctx.ID().getSymbol().getText());
+
+
+        FrameSlot slot = provider.defineSlot(ctx.ID().getSymbol().getText());
+        Frame fr = provider.getFrame();
+
         ExpressionNode init = visit(ctx.evaluation());
-        ExpressionNode dec = VariableDeclarationNodeGen.create(init, ctx.ID().getSymbol().getText());
+        ExpressionNode dec = VariableDeclarationNodeGen.create(init, ctx.ID().getSymbol().getText(), slot, fr.materialize());
 
         init.setParent(dec);
 
         return dec;
     }
 
+
     @Override
     public ExpressionNode visitFuncDefineNode(TigerParser.FuncDefineNodeContext ctx) {
 
 
-        //System.out.println(getIden() + "funcdef " + ctx.ID().getSymbol().getText());
-
         String[] args = new String[ctx.type_fields() != null? ctx.type_fields().func_arg().size(): 0];
+        FrameSlot slot = provider.defineSlot(ctx.il.getText());
+        slot.setKind(FrameSlotKind.Object);
 
-        for(int i = 0; i < args.length; i++)
+        functionDecs = functionDecs.addChild(functionDecs);
+
+        for(int i = 0; i < args.length; i++) {
             args[i] = ctx.type_fields().func_arg(i).name.getText();
+            functionDecs.addArgNode(args[i], new ArgDeclaration(i));
+        }
 
+        provider = provider.createChild(provider);
 
         ExpressionNode func = new FuncDeclarationNode(lang,args, visit(ctx.evaluation()), ctx.il.getText());
+
+        provider = provider.getParent();
+
+        provider.getFrame().setObject(slot, func);
+
+        functionDecs = functionDecs.getParent();
 
         return func;
     }
@@ -268,7 +288,10 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
     @Override
     public ExpressionNode visitMemberCallNode(TigerParser.MemberCallNodeContext ctx) {
-        return MemberAssignNodeGen.create(visit(ctx.eval), ctx.ID().getSymbol().getText());
+
+        Pair<Frame, FrameSlot> pair = provider.findUp(ctx.ID().getSymbol().getText());
+
+        return MemberAssignNodeGen.create(visit(ctx.eval), ctx.ID().getSymbol().getText(), pair.getValue(), pair.getKey().materialize());
     }
 
     @Override
@@ -319,7 +342,9 @@ public class TigerAstVisitor extends TigerBaseVisitor<ExpressionNode> {
 
         }
 
-        return new FuncCallNode(ctx.ID().getSymbol().getText(), params);
+        Pair<Frame, FrameSlot> pair = provider.findUp(ctx.ID().getSymbol().getText());
+
+        return new FuncCallNode(ctx.ID().getSymbol().getText(), params, pair.getValue(), pair.getKey().materialize());
     }
 
     @Override

@@ -25,7 +25,7 @@ public class FuncDeclarationNode extends DeclarationNode {
 
     private RootCallTarget callTarget;
     TigerLang lang;
-    ExpressionNode body;
+    ExpressionNode  body;
     String[] argName;
 
     Assumption callTargetStable;
@@ -49,6 +49,8 @@ public class FuncDeclarationNode extends DeclarationNode {
     }
 
     public RootCallTarget getCallTarget(){
+
+
         return callTarget;
     }
 
@@ -63,13 +65,6 @@ public class FuncDeclarationNode extends DeclarationNode {
 
     @Override
     public Object executeGeneric(VirtualFrame frame) {
-
-
-        FrameSlot slot = defineSlot(frame, name);
-        frame.setObject(slot, this);
-        slot.setKind(FrameSlotKind.Object);
-
-        // define args slots
 
         return null;
     }

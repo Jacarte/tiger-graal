@@ -3,10 +3,7 @@ package language.nodes.antlr.ast.block.functions;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.CompilerDirectives;
 import com.oracle.truffle.api.Truffle;
-import com.oracle.truffle.api.frame.Frame;
-import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.frame.FrameSlotTypeException;
-import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.frame.*;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import language.NilValue;
 import language.nodes.TigerRootNode;
@@ -25,11 +22,16 @@ public class FuncCallNode extends ExpressionNode {
 
     @Child DispatchNode dispatchNode;
 
-    public FuncCallNode(String name, ExpressionNode[] args){
+    FrameSlot slot;
+    Frame scope;
+
+    public FuncCallNode(String name, ExpressionNode[] args, FrameSlot slot, Frame scope){
         this.name = name;
         this.args = args;
 
         this.dispatchNode = DispatchNodeGen.create();
+        this.slot = slot;
+        this.scope = scope;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class FuncCallNode extends ExpressionNode {
 
         Object obj = null;
         try {
-            obj = readUpStack(Frame::getObject, frame, name);
+            obj = scope.getObject(slot);
         } catch (FrameSlotTypeException e) {
             e.printStackTrace();
         }
@@ -59,6 +61,7 @@ public class FuncCallNode extends ExpressionNode {
         }
 
         exprResults[0] = frame;
+
 
         if(obj instanceof FuncDeclarationNode)
             return dispatchNode.executeDispatch(obj, exprResults);

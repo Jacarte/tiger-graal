@@ -9,10 +9,12 @@ import language.TigerTypesGen;
 import language.nodes.antlr.ast.block.functions.FuncDefinitionNode;
 import language.nodes.antlr.ast.leaf.IdNode;
 import language.nodes.antlr.ast.scopes.ScopeException;
+import language.services.ILookupProvider;
+import language.services.LookupProviderFactory;
 
 import java.lang.reflect.Type;
 
-public abstract class ExpressionNode extends BaseTigerNode{
+public abstract class ExpressionNode extends BaseTigerNode {
 
 
 
@@ -33,105 +35,5 @@ public abstract class ExpressionNode extends BaseTigerNode{
                 this.executeGeneric(virtualFrame));
     }
 
-
-    public VirtualFrame createChild(VirtualFrame parent){
-        return Truffle.getRuntime().createVirtualFrame(new Object[]{parent}, new FrameDescriptor());
-    }
-
-
-    public FrameSlot getSlot(Frame fr, String name){
-        return fr.getFrameDescriptor().findFrameSlot(name);
-    }
-
-    public FrameSlot getSlotUp(Frame fr, String name){
-
-        FrameSlot slot = fr.getFrameDescriptor().findFrameSlot(name);
-
-        while(slot == null){
-            fr = getParentFrame(fr);
-
-            if(fr == null)
-                throw  new ScopeException("The variable is not defined " + name);
-
-            slot = fr.getFrameDescriptor().findFrameSlot(name);
-        }
-
-        return slot;
-    }
-
-
-    public FrameSlot defineSlot(Frame fr, String name){
-        return fr.getFrameDescriptor().addFrameSlot(name);
-    }
-
-    public <T> void writeUpStack(IdNode.FrameSet<T> setter, Frame frame, String name, T value, FrameSlotKind kind){
-        FrameSlot slot = getSlot(frame, name);
-
-        while(slot == null){
-            frame = this.getParentFrame(frame);
-
-            if(frame == null){
-                throw new RuntimeException("Unknown variable: " + name);
-            }
-            slot = getSlot(frame, name);
-
-        }
-
-        try {
-            setter.set(frame, slot, value);
-            slot.setKind(kind);
-        } catch (FrameSlotTypeException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @CompilerDirectives.CompilationFinal FrameSlot resolvedSlot;
-    @CompilerDirectives.CompilationFinal int lookupDeep;
-
-
-
-    public <T> T readUpStack(IdNode.FrameGet<T> getter, Frame frame, String name)
-            throws FrameSlotTypeException {
-
-        if (this.resolvedSlot == null) {
-            CompilerDirectives.transferToInterpreterAndInvalidate();
-            this.resolveSlot(getter, frame, name);
-        }
-
-        Frame lookupFrame = frame;
-        for (int i = 0; i < this.lookupDeep; i++) {
-            lookupFrame = this.getParentFrame(lookupFrame);
-        }
-        return getter.get(lookupFrame, this.resolvedSlot);
-    }
-
-    private <T> void resolveSlot(IdNode.FrameGet<T> getter, Frame frame, String name)
-            throws FrameSlotTypeException {
-        FrameSlot slot = this.getSlot(frame, name);
-        int depth = 0;
-        T value = slot == null? null : getter.get(frame, slot);
-        while (value == null) {
-            depth++;
-            frame = this.getParentFrame(frame);
-            if (frame == null) {
-                CompilerDirectives.transferToInterpreterAndInvalidate();
-                throw new RuntimeException("Unknown variable: "
-                        + name);
-            }
-            FrameDescriptor desc = frame.getFrameDescriptor();
-            slot = desc.findFrameSlot(name);
-            if (slot != null) {
-                value = getter.get(frame, slot);
-            }
-        }
-        this.lookupDeep = depth;
-        this.resolvedSlot = slot;
-    }
-
-
-    Frame getParentFrame(Frame f){
-        try{ return (Frame)f.getArguments()[0];}
-        catch (Exception e){return null;}
-    }
 
 }

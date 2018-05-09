@@ -1,5 +1,6 @@
 package language.nodes.antlr.ast.leaf;
 
+import com.oracle.truffle.api.dsl.NodeField;
 import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.*;
 import language.NilValue;
@@ -8,7 +9,12 @@ import org.antlr.v4.runtime.Token;
 
 import java.lang.reflect.Type;
 
+@NodeField(name = "scope", type = MaterializedFrame.class)
+@NodeField(name = "slot", type = FrameSlot.class)
 public abstract class IdNode extends TerminalNode {
+
+    public abstract FrameSlot getSlot();
+    public abstract MaterializedFrame getScope();
 
     public Type getType() {
         return Object.class;
@@ -30,7 +36,7 @@ public abstract class IdNode extends TerminalNode {
     public long readLong(VirtualFrame virtualFrame)
             throws FrameSlotTypeException {
 
-        return readUpStack(Frame::getLong, virtualFrame, getName());
+        return getScope().getLong(getSlot());
     }
 
     @Specialization(rewriteOn = FrameSlotTypeException.class,
@@ -39,17 +45,17 @@ public abstract class IdNode extends TerminalNode {
     public double readDouble(VirtualFrame virtualFrame)
             throws FrameSlotTypeException {
 
-        return readUpStack(Frame::getDouble, virtualFrame, getName());
+        return getScope().getDouble(getSlot());
     }
 
 
     boolean isDouble(VirtualFrame frame){
-        return getSlotUp(frame, getName()).getKind() == FrameSlotKind.Double;
+        return getSlot().getKind() == FrameSlotKind.Double;
     }
 
     boolean isLong(VirtualFrame frame){
 
-        return getSlotUp(frame, getName()).getKind() == FrameSlotKind.Long;
+        return getSlot().getKind() == FrameSlotKind.Long;
     }
 
 
@@ -59,7 +65,7 @@ public abstract class IdNode extends TerminalNode {
             throws FrameSlotTypeException {
 
 
-        return (FuncDefinitionNode) readUpStack(Frame::getObject, virtualFrame, getName());
+        return (FuncDefinitionNode) getScope().getObject(getSlot());
     }
 
 
@@ -68,7 +74,7 @@ public abstract class IdNode extends TerminalNode {
     public Object readObj(VirtualFrame virtualFrame)
             throws FrameSlotTypeException {
 
-        return  readUpStack(Frame::getObject, virtualFrame, getName());
+        return  getScope().getObject(getSlot());
     }
 
 

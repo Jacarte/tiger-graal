@@ -25,19 +25,18 @@ public class LetInTigerNode extends ExpressionNode {
     @ExplodeLoop
     public Object executeGeneric(VirtualFrame frame){
 
-        VirtualFrame newFrame = super.createChild(frame);
 
         CompilerAsserts.compilationConstant(InNode.length);
         CompilerAsserts.compilationConstant(Declarations.length);
 
         for(int i = 0; i < Declarations.length; i++)
-            Declarations[i].executeGeneric(newFrame);
+            Declarations[i].executeGeneric(frame);
 
         for(int i = 0; i < InNode.length - 1; i++)
-            InNode[i].executeGeneric(newFrame);
+            InNode[i].executeGeneric(frame);
 
         if(InNode.length > 0)
-            return InNode[InNode.length - 1].executeGeneric(newFrame);
+            return InNode[InNode.length - 1].executeGeneric(frame);
 
 
 

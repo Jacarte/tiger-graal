@@ -1,6 +1,10 @@
 package language.nodes.antlr.ast.block.loop;
 
 import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.dsl.NodeField;
+import com.oracle.truffle.api.frame.Frame;
+import com.oracle.truffle.api.frame.FrameSlot;
+import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.Node;
 import com.oracle.truffle.api.nodes.UnexpectedResultException;
@@ -26,11 +30,17 @@ public class ForNode extends LoopNode {
 
     String varId;
 
-    public ForNode(String varId, ExpressionNode init, ExpressionNode finalEx, ExpressionNode block){
+    FrameSlot slot;
+    MaterializedFrame scope;
+
+    public ForNode(String varId, ExpressionNode init, ExpressionNode finalEx, ExpressionNode block, FrameSlot slot, MaterializedFrame frame){
         this.varId = varId;
         this.end = finalEx;
         this.init = init;
         this.block = block;
+
+        this.slot = slot;
+        this.scope = frame;
     }
 
     @Override
@@ -40,23 +50,23 @@ public class ForNode extends LoopNode {
 
     @Override
     public final Object executeGeneric(VirtualFrame frame){
-        VirtualFrame child = super.createChild(frame);
 
         long init = 0;
         long end = 0;
-        defineSlot(child, varId);
 
         try {
-            init = this.init.executeLong(child);
-            end = this.end.executeLong(child);
+            init = this.init.executeLong(frame);
+            end = this.end.executeLong(frame);
 
         } catch (UnexpectedResultException e) {
             e.printStackTrace();
         }
 
-        loop = Truffle.getRuntime().createLoopNode(new ForRepeatingNode(varId, init, end, block));
+        loop = Truffle.getRuntime().createLoopNode(new ForRepeatingNode(varId, init, end, block, (assign) -> {
+            scope.setLong(slot, assign);
+        }));
 
-        loop.executeLoop(child);
+        loop.executeLoop(frame);
 
         return new NilValue();
     }

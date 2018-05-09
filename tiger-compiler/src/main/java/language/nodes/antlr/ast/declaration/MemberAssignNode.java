@@ -4,9 +4,7 @@ import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.NodeField;
 import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.frame.Frame;
-import com.oracle.truffle.api.frame.FrameSlotKind;
-import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.frame.*;
 import language.NilValue;
 import language.nodes.antlr.ast.ExpressionNode;
 import language.nodes.antlr.ast.block.functions.FuncDefinitionNode;
@@ -17,10 +15,15 @@ import java.lang.reflect.Type;
         @NodeChild(value = "assign" , type = ExpressionNode.class)
 })
 @NodeField(name = "id", type = String.class)
+@NodeField(name = "slot", type = FrameSlot.class)
+@NodeField(name="scope", type = MaterializedFrame.class)
 public abstract class MemberAssignNode extends ExpressionNode {
 
     public abstract String getId();
     public abstract ExpressionNode getAssign();
+
+    public abstract FrameSlot getSlot();
+    public abstract MaterializedFrame getScope();
 
     @Override
     public Type getType() {
@@ -30,15 +33,17 @@ public abstract class MemberAssignNode extends ExpressionNode {
     @Specialization
     public long executeLong(VirtualFrame frame, long result){
 
-        writeUpStack(Frame::setLong, frame, getId(), result, FrameSlotKind.Long);
 
+        getScope().setLong(getSlot(), result);
+        getSlot().setKind(FrameSlotKind.Long);
         return result;
     }
 
     @Specialization
     public String executeString(VirtualFrame frame,String result){
 
-        writeUpStack(Frame::setObject, frame, getId(), result, FrameSlotKind.Object);
+        getScope().setObject(getSlot(), result);
+        getSlot().setKind(FrameSlotKind.Object);
         return result;
     }
 
@@ -46,7 +51,8 @@ public abstract class MemberAssignNode extends ExpressionNode {
     public FuncDefinitionNode executeFuncDefinition(VirtualFrame frame, FuncDefinitionNode result){
 
 
-        writeUpStack(Frame::setObject, frame, getId(), result, FrameSlotKind.Object);
+        getScope().setObject(getSlot(), result);
+        getSlot().setKind(FrameSlotKind.Object);
 
         return result;
     }
@@ -54,17 +60,17 @@ public abstract class MemberAssignNode extends ExpressionNode {
     @Specialization
     public double executeDouble(VirtualFrame frame, double result){
 
-        writeUpStack(Frame::setDouble, frame, getId(), result, FrameSlotKind.Double);
 
+        getScope().setDouble(getSlot(), result);
+        getSlot().setKind(FrameSlotKind.Double);
         return result;
     }
 
 
     @Specialization
     public NilValue executeNil(VirtualFrame frame, NilValue result){
-
-        writeUpStack(Frame::setObject, frame, getId(), result, FrameSlotKind.Object);
-
+        getScope().setObject(getSlot(), result);
+        getSlot().setKind(FrameSlotKind.Object);
         return result;
     }
 
