@@ -1,0 +1,83 @@
+let
+    var result := 0
+    var start := 0
+    var en := 0
+    var cumul:=0
+
+    function mandelbrot(size)=
+        let
+            var sum:=0
+            var byte_acc:=0
+            var bit_num:=0
+
+            var y:= 0
+        in
+            while y < size do (
+                let
+                    var ci:= (2.0*y/size) - 1.0
+                    var x:= 0
+                in
+                    while x < size do(
+                        let
+                            var zr := 0.0
+                            var zrzr := 0.0
+                            var zi := 0.0
+                            var zizi := 0.0
+                            var cr := (2.0*x/size) - 1.5
+
+                            var z:=0
+                            var escape:=1
+                        in
+                            while z < 50 do (
+                                let
+                                    var tr:=  zrzr - zizi + cr
+                                    var ti := 2.0 * zr * zi + ci
+
+                                in
+                                    zr:=tr;
+                                    zi:=ti;
+                                    zrzr:=zr*zr;
+                                    zizi:=zi*zi;
+
+                                    if (zrzr + zizi) > 4.0 then(
+                                        escape:=0;
+                                        break
+                                    )
+
+                                end;
+
+                                z := z + 1
+
+                            );
+
+                            byte_acc := (byte_acc << 1) | escape;
+                            bit_num := bit_num + 1;
+
+                            if bit_num = 8 then(
+                                sum := sum ^ byte_acc;
+                                byte_acc :=0;
+                                bit_num :=0
+                            ) else if x = (size - 1) then(
+                                byte_acc := byte_acc << (8 - bit_num);
+                                sum = sum ^ byte_acc;
+                                byte_acc :=0;
+                                bit_num :=0
+                            )
+
+                        end;
+                        x := x + 1
+                    )
+                end;
+
+                y := y + 1
+            );
+             sum
+        end
+    in
+    for a:=0 to 750 do
+    (
+        start:=nano_time();
+        result := mandelbrot(1000);
+        print((nano_time() - start)/1000000)
+    )
+end

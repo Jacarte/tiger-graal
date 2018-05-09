@@ -1,0 +1,2 @@
+for a:=1 to 20000 do
+    print(a)
