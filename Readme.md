@@ -80,6 +80,7 @@ So, I ensure that exist only a few unboxing operations. The only unboxing operat
 
 ### Operation Lookups
 
+The use of Truffle api avoid unboxing in arithmetic operations and provide a huge boost in the time execution.
 
 
 ### Function calls
@@ -103,7 +104,8 @@ To pass arguments to a function call I set the arguments as follows :
         ```
         
         
-    
+#### Polymorphic 
+Polymorphic inline caches optimize function and property lookup in dynamic languages and are usually implemented using assembler code and code patching
 
 ### Tests
 
@@ -114,6 +116,7 @@ The <a href="https://github.com/smarr/Classic-Benchmarks/blob/master/benchmarks/
 ![alt results](imgs/result.png)
 
 The results are very encouraging. The deviation between the mean, the max and min execution time values is because Graal vm ensure inline function calls and cache the most cacheable nodes (Integer constants, etc), so the first calls have remarkable delays, but this is a java run effect too as we can see in the figure above.
+
 
 
 
