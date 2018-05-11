@@ -30,7 +30,7 @@ The principal modifications are:
     - **nano_time** (returns the **System.nanoTime()** Java function result)
     - **wait** (Sleep the current thread by **x** milliseconds where **x** is the first argument)
     
-- There is no type declaration or check. All types and values are created and assigns dynamically
+- There is no type declaration or check. All types and values are created and assigned dynamically
 
 - There is no comment declarations
 
@@ -68,7 +68,7 @@ In dynamic languages, the concrete operation behind the multiplication ‘*’, 
  
 For optimal performance a language implementation needs to ensure that  these operators are not looked up for every single operation. 
 
-My first approach to the variable (read, write) and function lookups shows that there is a huge overload in did ... almost 10X time of the final time execution result. 
+My first approach to the variable (read, write) and function lookups shows that there is a huge overload in did, almost 10X time of the final time execution result. 
 
 ### Variable lookup
 
@@ -87,7 +87,7 @@ The use of Truffle api avoid unboxing in arithmetic operations and provide a hug
 
 Truffe can set the function call arguments in a api class named Frame, that is optimized in the graal vm execution.
 
-In Tiger we have nested functions args scopes, for this reason, I added an extra argument in the Frame object passed to a function call.
+In Tiger we have nested functions args scopes. For this reason, I added an extra argument in the Frame object passed to a function call.
 
 To pass arguments to a function call I set the arguments as follows :
    - The first argument is the current execution branch Frame
@@ -104,7 +104,7 @@ To pass arguments to a function call I set the arguments as follows :
         ```
         
         
-#### Polymorphic 
+#### Polymorphic Inline
 Polymorphic inline caches optimize function and property lookup in dynamic languages and are usually implemented using assembler code and code patching
 
 ### Tests
@@ -123,7 +123,7 @@ The results are very encouraging. The deviation between the mean, the max and mi
 ## Future research
 - Tail call optimization:
 
-    In related works <a href="http://cesquivias.github.io/blog/2015/01/15/writing-a-language-in-truffle-part-4-adding-features-the-truffle-way/">[1]</a> the author propose to implement a Tail Call optimization showing very good results for recursive function calls
+    In related works <a href="http://cesquivias.github.io/blog/2015/01/15/writing-a-language-in-truffle-part-4-adding-features-the-truffle-way/">[1]</a> the author proposes to implement a Tail Call optimization showing very good results for recursive function calls
 - IGV profiling to detect operations time overloads and unexpected nodes construction
 
     
