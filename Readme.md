@@ -131,11 +131,11 @@ Polymorphic inline caches optimize function and property lookup in dynamic langu
 
 ### Tests
 
-The <a href="https://github.com/smarr/Classic-Benchmarks/blob/master/benchmarks/Mandelbrot.java#L42ß">classic Mandelbrot benchmark</a> for Java was tested against <a href="https://github.com/Jacarte/tiger-Graal/src/tests/mandelbrot.tiger">a custom tiger Mandelbrot test<a>
+The <a href="https://github.com/smarr/Classic-Benchmarks/blob/master/benchmarks/Mandelbrot.java#L42ß">classic Mandelbrot benchmark</a> for Java was tested against <a href="https://github.com/Jacarte/tiger-graal/tree/master/tiger-compiler/src/tests/mandelbrot.tiger">a custom tiger Mandelbrot test<a>
 
 ### Tests Results and remarks
 
-![alt results](/assets/img/result.png)
+![alt results](/imgs/result.png)
 
 The results are very encouraging. The deviation between the mean, the max and min execution time values is because Graal VM ensure inline function calls and cache the most cacheable nodes (Integer constants, etc), so the first calls have remarkable delays, but this is a Java run effect too as we can see in the figure above.
 
