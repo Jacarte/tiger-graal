@@ -71,11 +71,11 @@ These are the types mapped using Java POO patterns definition:
 
 Tiger script parsing is made using ANTLR 4.0 framework to generate a basic Abstract Syntax Tree to evaluate the script. The first approach to interpret the source code can be visiting the obtained AST, but the main idea of this work is to use/test the Graal and Truflle potentials.
 
-I use the previously obtained AST to transform it into a Truffle tree. Most of the compiler’s implementations have four basic stages: 1 - Tokenize, 2 - Obtain a tree base on the grammar, 3 - Semantical analysis, 4 - Generate code, the first two stages are achieved using Antlr, the next two are the Graal/Truffle matter.
+I use the previously obtained AST to transform it into a Truffle tree. Most of the compiler’s implementations have four basic stages: 1 - Tokenize, 2 - Obtain a tree base on the grammar, 3 - Semantic analysis, 4 - Code generaton, the first two stages are achieved using Antlr, the next two are the Graal/Truffle matter.
 
 ### Variable Scope
 
-The variables and functions scope are implemented like tree parent struct. Every scope has a parent scope. If a variable does not exist in the current scope, then, it is searched in the parent scope until the variable is found or there is no parent and throw a “The variable x is not defined” exception.
+The variables and functions scope are implemented like tree parent struct. Every scope has a parent scope. If a variable does not exist in the current scope, then, it is searched in the parent scope until the variable is found or there is no parent throwing “The variable x is not defined” exception.
 
 ```
     
